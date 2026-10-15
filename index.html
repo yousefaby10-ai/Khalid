@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خالد الجعلي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Lalezar&display=swap">
+<style>
+/* Layout: ليلة بحر. هيرو بقرص دوّار بجانب الاسم، ثم قائمة أغاني مرقّمة بترتيب الألبوم، ومشغّل ثابت أسفل الشاشة. */
+:root {
+  --bg: #e7eef0;
+  --surface: #f4f8f9;
+  --fg: #0c2230;
+  --muted: #4d6572;
+  --line: #c3d2d8;
+  --accent: #0b7f86;
+  --accent-ink: #ffffff;
+  --sand: #a8782a;
+  --display: 'Lalezar', 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  --body: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+  --disc: #0c2230;
+  --disc-groove: #1c3a4d;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1820; --surface: #112430; --fg: #e6eef1; --muted: #8fa9b6; --line: #21404f;
+    --accent: #3fd0c9; --accent-ink: #062226; --sand: #e0b86a;
+    --disc: #050d12; --disc-groove: #17313f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1820; --surface: #112430; --fg: #e6eef1; --muted: #8fa9b6; --line: #21404f;
+  --accent: #3fd0c9; --accent-ink: #062226; --sand: #e0b86a;
+  --disc: #050d12; --disc-groove: #17313f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--body); font-size: 16px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+.page { max-width: 960px; margin: 0 auto; padding-bottom: 120px; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 20px; border-bottom: 1px solid var(--line); }
+.top strong { font-family: var(--display); font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; }
+.top span { color: var(--muted); font-size: 0.9rem; }
+
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center; padding-block: 48px 40px; }
+.eyebrow { color: var(--sand); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.04em; margin: 0 0 8px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3.4rem, 12vw, 6.4rem); line-height: 1.05; margin: 0 0 16px; text-wrap: balance; }
+.lead { max-width: 34em; color: var(--muted); margin: 0 0 24px; }
+.credits { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; padding-top: 16px; border-top: 1px solid var(--line); max-width: 24em; }
+.credits dt { color: var(--muted); font-size: 0.9rem; }
+.credits dd { margin: 0; font-weight: 600; }
+
+.stage-wrap { display: grid; place-items: center; min-width: 0; }
+.stage { position: relative; width: 100%; max-width: 300px; aspect-ratio: 9 / 16; background: var(--disc); border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+.stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.stage .cover { position: absolute; inset: 0; width: 100%; border: 0; background: transparent; display: grid; place-items: center; padding: 0; }
+.stage .cover .play { width: 64px; height: 64px; }
+.stage .cover .play svg { width: 26px; height: 26px; }
+.playing .stage .cover { opacity: 0; }
+.stage .cover:focus-visible { opacity: 1; }
+.stage-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); }
+
+.tracks-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--fg); }
+.tracks-head h2 { font-family: var(--display); font-weight: 400; font-size: 1.8rem; margin: 0; }
+.tracks-head span { color: var(--muted); font-size: 0.9rem; }
+
+.tracks { list-style: none; margin: 0; padding: 0; }
+.track { display: grid; grid-template-columns: 2.2rem 1fr auto; gap: 12px; align-items: center; padding: 14px 4px; border-bottom: 1px solid var(--line); }
+.track .no { font-variant-numeric: tabular-nums; color: var(--muted); text-align: center; }
+.track .meta { min-width: 0; }
+.track .name { font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.track .date { color: var(--muted); font-size: 0.85rem; }
+.track.current .name, .track.current .no { color: var(--accent); }
+.play {
+  width: 48px; height: 48px; border-radius: 50%; border: 0;
+  background: var(--accent); color: var(--accent-ink); display: grid; place-items: center;
+}
+.play svg { width: 20px; height: 20px; fill: currentColor; }
+
+.empty { padding: 40px 0; display: grid; gap: 8px; max-width: 30em; }
+.empty strong { font-family: var(--display); font-weight: 400; font-size: 1.8rem; color: var(--sand); }
+.empty p { margin: 0; color: var(--muted); }
+
+.foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+
+.player {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 10;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-top: 12px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.player-in { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; }
+.player .ctrl { display: flex; align-items: center; gap: 8px; grid-row: span 2; }
+.player .small { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: transparent; display: grid; place-items: center; }
+.player .small svg { width: 18px; height: 18px; fill: currentColor; }
+.player .info { min-width: 0; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.player .now { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.player .time { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; direction: ltr; flex: none; }
+.seek { width: 100%; accent-color: var(--accent); margin: 0; }
+
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; padding-block: 32px; }
+  .stage-wrap { order: -1; }
+  .stage { max-width: 240px; }
+}
+</style>
+<style>html{color-scheme:light}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<div dir="rtl" lang="ar" class="page" id="root">
+  <header class="top">
+    <strong>خالد الجعلي</strong>
+    <span>ألبوم يصدر أغنية بعد أغنية</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">الألبوم الجديد</p>
+      <h1>خالد الجعلي</h1>
+      <p class="lead">الألبوم ينزل هنا على دفعات. كل ما نزلت أغنية جديدة تلقاها في القائمة تحت وتقدر تسمعها مباشرة.</p>
+      <dl class="credits">
+        <dt>غناء</dt><dd>خالد الجعلي</dd>
+        <dt>إنتاج وتصميم</dt><dd>يوسف الثبيتي</dd>
+      </dl>
+    </div>
+    <div class="stage-wrap">
+      <div class="stage">
+        <video id="vid" playsinline preload="metadata"></video>
+        <button class="cover" id="cover" type="button" aria-label="تشغيل الفيديو" hidden><span class="play" id="coverPlay"></span></button>
+        <div class="stage-empty" id="stageEmpty"><span>الفيديو يظهر هنا<br>أول ما تنزل الأغنية</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="tl">
+    <div class="tracks-head">
+      <h2 id="tl">الأغاني</h2>
+      <span id="count"></span>
+    </div>
+    <ol class="tracks" id="tracks"></ol>
+    <div class="empty" id="empty" hidden>
+      <strong>أول أغنية قريباً</strong>
+      <p>القائمة فاضية الحين. أول ما تنزل الأغنية الأولى بتظهر هنا ويجيك زر التشغيل جنبها.</p>
+    </div>
+  </section>
+
+  <footer class="foot">غناء خالد الجعلي · إنتاج وتصميم يوسف الثبيتي</footer>
+</div>
+
+<div class="player" id="player" dir="rtl" lang="ar" hidden>
+  <div class="player-in">
+    <div class="ctrl">
+      <button class="small" id="next" aria-label="الأغنية التالية" type="button"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18V6l8.5 6z" transform="matrix(-1 0 0 1 24 0)"/></svg></button>
+      <button class="play" id="toggle" aria-label="تشغيل" type="button"></button>
+      <button class="small" id="prev" aria-label="الأغنية السابقة" type="button"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18V6l8.5 6z"/></svg></button>
+    </div>
+    <div class="info"><span class="now" id="now"></span><span class="time" id="time">0:00 / 0:00</span></div>
+    <input class="seek" id="seek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل">
+  </div>
+</div>
+
+<script>
+/* لإضافة أغنية: ضيف سطر هنا بالترتيب. file هو اسم ملف الصوت المرفوع مع الموقع. */
+var TRACKS = [
+  { title: 'قبل اعرفك', file: '01.mp4', date: '2026-10-15' },
+  { title: 'اوعدك', file: '02.mp4', date: '2026-10-15' },
+  // { title: 'اسم الأغنية', file: '03.mp4', date: '2026-10-20' },
+];
+
+var ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+var ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+var $ = function (id) { return document.getElementById(id); };
+var audio = $('vid'), toggle = $('toggle'), seek = $('seek'), cur = -1, loaded = -1;
+
+function fmt(s) {
+  if (!isFinite(s)) return '0:00';
+  var m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ':' + (r < 10 ? '0' : '') + r;
+}
+function fmtDate(d) {
+  try { return new Date(d + 'T12:00:00').toLocaleDateString('ar-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' }); }
+  catch (e) { return d; }
+}
+function nf(n) { try { return n.toLocaleString('ar-EG'); } catch (e) { return String(n); } }
+
+function render() {
+  var ol = $('tracks');
+  ol.innerHTML = '';
+  $('empty').hidden = TRACKS.length > 0;
+  $('count').textContent = TRACKS.length ? (TRACKS.length === 1 ? 'أغنية واحدة نزلت' : nf(TRACKS.length) + ' أغاني نزلت') : '';
+  TRACKS.forEach(function (t, i) {
+    var li = document.createElement('li');
+    li.className = 'track' + (i === cur ? ' current' : '');
+    var no = document.createElement('span'); no.className = 'no'; no.textContent = nf(i + 1);
+    var meta = document.createElement('div'); meta.className = 'meta';
+    var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = t.title;
+    meta.appendChild(nm);
+    if (t.date) { var dt = document.createElement('div'); dt.className = 'date'; dt.textContent = fmtDate(t.date); meta.appendChild(dt); }
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'play';
+    b.setAttribute('aria-label', 'تشغيل ' + t.title);
+    b.innerHTML = (i === cur && !audio.paused) ? ICON_PAUSE : ICON_PLAY;
+    b.addEventListener('click', function () { choose(i); });
+    li.appendChild(no); li.appendChild(meta); li.appendChild(b);
+    ol.appendChild(li);
+  });
+}
+
+function choose(i) {
+  if (i === cur) { audio.paused ? audio.play() : audio.pause(); return; }
+  cur = i;
+  load(i);
+  $('player').hidden = false;
+  $('now').textContent = TRACKS[i].title;
+  seek.value = 0;
+  audio.play().catch(function () {});
+  render();
+}
+function load(i) {
+  if (loaded === i) return;
+  loaded = i;
+  audio.src = TRACKS[i].file;
+  $('stageEmpty').hidden = true;
+  $('cover').hidden = false;
+}
+function step(d) {
+  if (!TRACKS.length) return;
+  choose((cur + d + TRACKS.length) % TRACKS.length);
+}
+
+function sync() {
+  var playing = !audio.paused;
+  toggle.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+  toggle.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+  $('coverPlay').innerHTML = ICON_PLAY;
+  $('root').classList.toggle('playing', playing);
+  render();
+}
+$('cover').addEventListener('click', function () {
+  if (cur < 0) { choose(0); return; }
+  audio.paused ? audio.play() : audio.pause();
+});
+audio.addEventListener('click', function () { if (cur >= 0) { audio.paused ? audio.play() : audio.pause(); } });
+
+toggle.addEventListener('click', function () { if (cur < 0) return; audio.paused ? audio.play() : audio.pause(); });
+$('next').addEventListener('click', function () { step(1); });
+$('prev').addEventListener('click', function () {
+  if (audio.currentTime > 3) { audio.currentTime = 0; } else { step(-1); }
+});
+audio.addEventListener('play', sync);
+audio.addEventListener('pause', sync);
+audio.addEventListener('ended', function () { if (cur < TRACKS.length - 1) step(1); else sync(); });
+audio.addEventListener('timeupdate', function () {
+  if (audio.duration) seek.value = Math.round(audio.currentTime / audio.duration * 1000);
+  $('time').textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+});
+audio.addEventListener('loadedmetadata', function () {
+  $('time').textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+});
+seek.addEventListener('input', function () {
+  if (audio.duration) audio.currentTime = seek.value / 1000 * audio.duration;
+});
+
+toggle.innerHTML = ICON_PLAY;
+$('coverPlay').innerHTML = ICON_PLAY;
+if (TRACKS.length) load(0);
+render();
+</script>
+
+</body>
+</html>
